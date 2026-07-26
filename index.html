@@ -21,10 +21,12 @@ button,a.btn{border:0;border-radius:14px;padding:13px 14px;font-size:1rem;font-w
 .tab{background:transparent;color:var(--muted);border-radius:0;padding:11px 2px 18px;font-size:.7rem}.tab.active{color:var(--primary);font-weight:850}
 section{display:none}section.active{display:block}.progress{height:10px;background:#e8eeec;border-radius:999px;overflow:hidden}.progress>div{height:100%;background:var(--primary);width:0}
 .notice{background:#fff7e8;border:1px solid #ecd29d;padding:12px;border-radius:14px;color:#6b4600;font-size:.88rem}
-.exercise{padding:12px 0;border-top:1px solid var(--border)}.exercise:first-child{border-top:0}.exercise-head{display:flex;justify-content:space-between;gap:10px;align-items:center}.done{opacity:.5;text-decoration:line-through}
+.exercise{padding:12px 0;border-top:1px solid var(--border)}.exercise:first-child{border-top:0}.exercise-head{display:flex;justify-content:space-between;gap:10px;align-items:center}.done{opacity:.5;text-decoration:line-through}.exercise.current{background:var(--soft);border-radius:14px;margin:6px -10px;padding:12px 10px;border-top:0}
+.phase.rest{color:#b98900}
 .timer{font-size:3.2rem;font-weight:850;text-align:center;font-variant-numeric:tabular-nums;margin:14px 0}.phase,.round{text-align:center}.phase{font-weight:800;font-size:1.1rem}.round{color:var(--muted)}
 .timer-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}.checkrow{display:flex;gap:10px;align-items:center;margin:10px 0}.checkrow input{width:22px;height:22px}
 label{display:block;font-weight:750;font-size:.9rem;margin:10px 0 5px}input,select{width:100%;padding:12px;border:1px solid var(--border);border-radius:12px;font-size:1rem;background:#fff}
+input[type=checkbox]{accent-color:var(--primary)}
 table{width:100%;border-collapse:collapse;font-size:.88rem}th,td{text-align:left;padding:9px 6px;border-bottom:1px solid var(--border)}th{color:var(--muted)}
 canvas{width:100%;height:220px;background:#fbfcfc;border:1px solid var(--border);border-radius:14px}.week-row{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.week-btn{background:#eef2f0;color:var(--text);padding:10px 4px}.week-btn.active{background:var(--primary);color:#fff}
 .video{display:block;margin-top:8px;color:var(--primary);font-weight:700;text-decoration:none}.hidden{display:none}
@@ -69,8 +71,10 @@ canvas{width:100%;height:220px;background:#fbfcfc;border:1px solid var(--border)
 <section id="training">
 <div class="card"><div class="phase" id="phase">Bereit</div><div class="timer" id="timer">00:40</div><div class="round" id="roundInfo">Training</div>
 <div class="timer-actions"><button class="primary" id="timerBtn" onclick="toggleTimer()">Start</button><button class="ghost" onclick="resetTimer()">Zurücksetzen</button></div>
+<div class="grid2">
 <div class="checkrow"><input type="checkbox" id="coach" checked><label for="coach" style="margin:0">Sprachcoach</label></div>
-<div class="checkrow"><input type="checkbox" id="sound" checked><label for="sound" style="margin:0">Signaltöne</label></div></div>
+<div class="checkrow"><input type="checkbox" id="sound" checked><label for="sound" style="margin:0">Signaltöne</label></div>
+</div></div>
 <div class="card"><h2 id="trainingTitle">Übungen</h2><div id="exerciseList"></div><button class="primary full" onclick="finishWorkout()">Einheit abschließen</button></div>
 <div class="card"><h2>Musik</h2><p class="small">Tabata-Musik läuft nur als Motivation im Hintergrund.</p><div class="stack">
 <a class="btn secondary" target="_blank" href="https://music.apple.com/de/search?term=tabata%20workout">Apple Music</a>
@@ -124,12 +128,10 @@ canvas{width:100%;height:220px;background:#fbfcfc;border:1px solid var(--border)
 </div></nav>
 
 <script>
-function wu(detail,cue){return{name:"Warm-up",detail,cue,section:"Warm-up"}}
 function cd(detail,cue){return{name:"Cooldown",detail,cue,section:"Cooldown"}}
 function ex(name,detail,cue,section){return{name,detail,cue,section}}
 const plans={
 1:{goal:"Technik lernen",rounds:2,target:3,ex:[
- wu("2 Minuten","Gelenke mobilisieren, Puls sachte steigern"),
  ex("Deadlift","12 Wiederholungen","Rücken neutral, Hüfte zurück","Kraft"),
  ex("Goblet Squat","10 Wiederholungen","Kettlebell nah am Körper","Kraft"),
  ex("Half Kneeling Clean & Press","8 je Seite","Ruhig, kein Schwung aus dem Rücken","Core / Stabilität"),
@@ -138,7 +140,6 @@ const plans={
  ex("Pullover","10 Wiederholungen","Kontrolliert, Rippen nicht aufstellen","Core / Stabilität"),
  cd("2 Minuten","Dehnen, ruhig ausatmen")]},
 2:{goal:"Technik festigen",rounds:2,target:3,ex:[
- wu("2 Minuten","Gelenke mobilisieren, Puls sachte steigern"),
  ex("Deadlift","15 Wiederholungen","Langsam absenken","Kraft"),
  ex("Goblet Squat","12 Wiederholungen","3 Sekunden nach unten","Kraft"),
  ex("Half Kneeling Clean & Press","10 je Seite","Sauberer Übergang ins Pressen","Core / Stabilität"),
@@ -147,7 +148,6 @@ const plans={
  ex("Pullover","12 Wiederholungen","Atmung mit der Bewegung koppeln","Core / Stabilität"),
  cd("2 Minuten","Dehnen, ruhig ausatmen")]},
 3:{goal:"Kraftausdauer",rounds:3,target:3,ex:[
- wu("2 Minuten","Etwas zügiger einlaufen"),
  ex("Deadlift","15 Wiederholungen","Saubere Hüftbewegung","Kraft"),
  ex("Goblet Squat","12 Wiederholungen","Ruhiges Tempo","Kraft"),
  ex("Half Kneeling Clean & Press","10 je Seite","Kontrolle vor Tempo","Core / Stabilität"),
@@ -156,7 +156,6 @@ const plans={
  ex("Pullover","12 Wiederholungen","Bauchspannung halten","Core / Stabilität"),
  cd("2 Minuten","Dehnen, ruhig ausatmen")]},
 4:{goal:"Stabilität",rounds:3,target:3,ex:[
- wu("2 Minuten","Fokus auf Hüfte und Schultern"),
  ex("Romanian Deadlift","15 Wiederholungen","Knie leicht gebeugt","Kraft"),
  ex("Goblet Squat","15 Wiederholungen","Schmerzfreie Tiefe","Kraft"),
  ex("Half Kneeling Clean & Press","12 je Seite","Stabiler Stand, kein Wackeln","Core / Stabilität"),
@@ -165,7 +164,6 @@ const plans={
  ex("Pullover","12 Wiederholungen","Schmerzfreier Bewegungsradius","Core / Stabilität"),
  cd("2 Minuten","Dehnen, ruhig ausatmen")]},
 5:{goal:"Kurze Intervalle",rounds:3,target:3,ex:[
- wu("2 Minuten","Puls moderat anheben"),
  ex("Deadlift","40 Sekunden","Gleichmäßig","Kraft"),
  ex("Goblet Squat","40 Sekunden","Kontrolliert","Kraft"),
  ex("Half Kneeling Clean & Press","40 Sekunden je Seite","Sauberer Rhythmus","Core / Stabilität"),
@@ -174,7 +172,6 @@ const plans={
  ex("Pullover","40 Sekunden","Ruhige Atmung","Core / Stabilität"),
  cd("2 Minuten","Dehnen, ruhig ausatmen")]},
 6:{goal:"Leistung steigern",rounds:3,target:3,ex:[
- wu("2 Minuten","Zügiger einlaufen"),
  ex("Deadlift","45 Sekunden","Qualität vor Tempo","Kraft"),
  ex("Goblet Squat","45 Sekunden","Ruhig atmen","Kraft"),
  ex("Half Kneeling Clean & Press","45 Sekunden je Seite","Saubere Form","Core / Stabilität"),
@@ -183,7 +180,6 @@ const plans={
  ex("Pullover","45 Sekunden","Kontrollierte Range","Core / Stabilität"),
  cd("2 Minuten","Dehnen, ruhig ausatmen")]},
 7:{goal:"Ganzkörper-Zirkel",rounds:3,target:3,ex:[
- wu("2 Minuten","Gelenke mobilisieren"),
  ex("Deadlift","40 Sekunden","Gleichmäßig","Kraft"),
  ex("Goblet Squat","40 Sekunden","Kontrolliert","Kraft"),
  ex("Half Kneeling Clean & Press","40 Sekunden je Seite","Schultern tief","Core / Stabilität"),
@@ -192,7 +188,6 @@ const plans={
  ex("Pullover","40 Sekunden","Bauchspannung","Core / Stabilität"),
  cd("2 Minuten","Dehnen, ruhig ausatmen")]},
 8:{goal:"Abschlusswoche",rounds:3,target:3,ex:[
- wu("2 Minuten","Ruhig einlaufen"),
  ex("Deadlift","45 Sekunden","Kraftvoll und sauber","Kraft"),
  ex("Goblet Squat","45 Sekunden","Angenehme Tiefe","Kraft"),
  ex("Half Kneeling Clean & Press","45 Sekunden je Seite","Ruhig","Core / Stabilität"),
@@ -219,13 +214,26 @@ function beep(f=880,d=.12){if(!document.getElementById("sound")?.checked)return;
 function renderWeeks(){const c=document.getElementById("weeks");c.innerHTML="";for(let i=1;i<=8;i++){const b=document.createElement("button");b.className="week-btn"+(i===state.week?" active":"");b.textContent="W"+i;b.onclick=()=>{state.week=i;saveState();renderAll()};c.appendChild(b)}}
 function renderPlan(){const p=plans[state.week];let last=null,body="";p.ex.forEach(x=>{if(x.section!==last){body+=`<h3 style="margin-top:16px;color:var(--primary);font-size:.95rem;text-transform:uppercase;letter-spacing:.03em">${x.section}</h3>`;last=x.section}body+=`<div class="exercise"><h3>${x.name}</h3><div>${x.detail}</div><div class="small">${x.cue}</div><a class="video" target="_blank" href="https://www.youtube.com/results?search_query=${encodeURIComponent(x.name+' Technik deutsch')}">Technikvideo</a></div>`});document.getElementById("planCard").innerHTML=`<h2>Woche ${state.week}: ${p.goal}</h2><p><strong>${p.target} Einheiten</strong> · ${p.rounds} Runden Kraft/Core</p>${body}<p class="small">Unterwegs ersetzt das 6-Minuten-Programm eine Einheit.</p>`}
 function exercises(){return state.mode==="travel"?travel:plans[state.week].ex}
-function renderTraining(){document.getElementById("trainingTitle").textContent=state.mode==="travel"?"Unterwegs · 6 Minuten":`Zuhause · Woche ${state.week}`;document.getElementById("roundInfo").textContent=state.mode==="travel"?"Reiseprogramm":`${plans[state.week].rounds} Runden`;let last=null,body="";exercises().forEach((x,i)=>{if(x.section&&x.section!==last){body+=`<h3 style="margin-top:14px;color:var(--primary);font-size:.9rem;text-transform:uppercase;letter-spacing:.03em">${x.section}</h3>`;last=x.section}body+=`<div class="exercise" id="ex${i}"><div class="exercise-head"><div><h3>${x.name}</h3><div>${x.detail}</div><div class="small">${x.cue}</div></div><button class="secondary" onclick="document.getElementById('ex${i}').classList.toggle('done')">✓</button></div></div>`});document.getElementById("exerciseList").innerHTML=body}
-function startHome(){state.mode="home";saveState();resetTimer();renderTraining();show("training",document.querySelectorAll(".tab")[2])}
-function startTravel(){state.mode="travel";saveState();resetTimer();renderTraining();show("training",document.querySelectorAll(".tab")[2])}
+function renderTraining(){document.getElementById("trainingTitle").textContent=state.mode==="travel"?"Unterwegs · 6 Minuten":`Zuhause · Woche ${state.week}`;let last=null,body="";exercises().forEach((x,i)=>{if(x.section&&x.section!==last){body+=`<h3 style="margin-top:14px;color:var(--primary);font-size:.9rem;text-transform:uppercase;letter-spacing:.03em">${x.section}</h3>`;last=x.section}body+=`<div class="exercise" id="ex${i}"><div class="exercise-head"><div><h3>${x.name}</h3><div>${x.detail}</div><div class="small">${x.cue}</div></div><button class="secondary" onclick="document.getElementById('ex${i}').classList.toggle('done')">✓</button></div></div>`});document.getElementById("exerciseList").innerHTML=body;resetWorkout()}
+function startHome(){state.mode="home";saveState();renderTraining();show("training",document.querySelectorAll(".tab")[2])}
+function startTravel(){state.mode="travel";saveState();renderTraining();show("training",document.querySelectorAll(".tab")[2])}
+const WORK_DEFAULT=30,REST_SECONDS=10;
+function parseDuration(detail){const s=detail.match(/(\d+)\s*Sekunden/);if(s)return parseInt(s[1]);const m=detail.match(/(\d+)\s*Minuten/);if(m)return parseInt(m[1])*60;return WORK_DEFAULT}
+function buildSequence(){const list=exercises(),rounds=state.mode==="travel"?1:plans[state.week].rounds,steps=[];list.forEach((x,i)=>{if(x.section==="Warm-up")steps.push({name:x.name,detail:x.detail,cue:x.cue,section:x.section,duration:parseDuration(x.detail),round:1,exIndex:i})});for(let r=1;r<=rounds;r++){list.forEach((x,i)=>{if(x.section!=="Warm-up"&&x.section!=="Cooldown")steps.push({name:x.name,detail:x.detail,cue:x.cue,section:x.section||"Übungen",duration:parseDuration(x.detail),round:r,exIndex:i})})}list.forEach((x,i)=>{if(x.section==="Cooldown")steps.push({name:x.name,detail:x.detail,cue:x.cue,section:x.section,duration:parseDuration(x.detail),round:1,exIndex:i})});return steps}
+let seq=[],stepIdx=0,subPhase="work";
+function highlightExercise(s){document.querySelectorAll("#exerciseList .exercise").forEach(el=>el.classList.remove("current"));const el=document.getElementById("ex"+s.exIndex);if(el)el.classList.add("current")}
+function loadStep(){const rounds=state.mode==="travel"?1:plans[state.week].rounds;if(stepIdx>=seq.length){finishSequence();return}const s=seq[stepIdx];timeLeft=subPhase==="work"?s.duration:REST_SECONDS;document.getElementById("phase").textContent=subPhase==="work"?s.name:"Pause";document.getElementById("phase").classList.toggle("rest",subPhase==="rest");document.getElementById("roundInfo").textContent=state.mode==="travel"?"Reiseprogramm":(s.section==="Warm-up"||s.section==="Cooldown"?s.section:`${s.section} · Runde ${s.round} von ${rounds}`);updateTimer();document.getElementById("timerBtn").textContent="Start";highlightExercise(s)}
+let musicOpened=false;
+function resetWorkout(){clearInterval(timerId);running=false;seq=buildSequence();stepIdx=0;subPhase="work";musicOpened=false;if(seq.length)loadStep();else{document.getElementById("phase").textContent="Bereit";document.getElementById("phase").classList.remove("rest")}}
+function markExerciseDone(step){const el=document.getElementById("ex"+step.exIndex);if(el)el.classList.add("done")}
+function startPhase(){running=true;document.getElementById("timerBtn").textContent="Pause";const s=seq[stepIdx];if(subPhase==="work"){beep(1000,.15);speak(s.name)}else{beep(600,.15);speak("Pause")}timerId=setInterval(tick,1000)}
+function tick(){timeLeft--;updateTimer();if(timeLeft===10&&subPhase==="work")speak("Noch zehn Sekunden");if(timeLeft<=3&&timeLeft>0)beep(700,.06);if(timeLeft<=0){clearInterval(timerId);running=false;beep(1200,.3);navigator.vibrate?.([200,100,200]);advanceStep()}}
+function advanceStep(){if(subPhase==="work"){markExerciseDone(seq[stepIdx]);if(stepIdx===seq.length-1){finishSequence();return}subPhase="rest"}else{stepIdx++;subPhase="work"}loadStep();startPhase()}
+function finishSequence(){clearInterval(timerId);running=false;document.getElementById("phase").textContent="Einheit fertig!";document.getElementById("phase").classList.remove("rest");document.getElementById("timerBtn").textContent="Start";speak("Einheit fertig, gut gemacht");beep(1400,.4)}
 function updateTimer(){document.getElementById("timer").textContent=`${String(Math.floor(timeLeft/60)).padStart(2,"0")}:${String(timeLeft%60).padStart(2,"0")}`}
-function toggleTimer(){if(running){clearInterval(timerId);running=false;document.getElementById("timerBtn").textContent="Start";return}running=true;document.getElementById("timerBtn").textContent="Pause";document.getElementById("phase").textContent="Training";beep(1000,.15);speak("Start");timerId=setInterval(()=>{timeLeft--;updateTimer();if(timeLeft===10)speak("Noch zehn Sekunden");if(timeLeft<=3&&timeLeft>0)beep(700,.06);if(timeLeft<=0){clearInterval(timerId);running=false;document.getElementById("timerBtn").textContent="Start";document.getElementById("phase").textContent="Intervall beendet";beep(1200,.3);speak("Intervall beendet");navigator.vibrate?.([200,100,200])}},1000)}
-function resetTimer(){clearInterval(timerId);running=false;timeLeft=40;document.getElementById("timerBtn").textContent="Start";document.getElementById("phase").textContent="Bereit";updateTimer()}
-function finishWorkout(){const k="w"+state.week;state.done[k]=(state.done[k]||0)+1;saveState();renderAll();alert("Einheit gespeichert.");show("home",document.querySelectorAll(".tab")[0])}
+function toggleTimer(){if(running){clearInterval(timerId);running=false;document.getElementById("timerBtn").textContent="Start";return}if(stepIdx>=seq.length){resetWorkout()}if(!musicOpened&&stepIdx===0&&subPhase==="work"){musicOpened=true;window.open("https://open.spotify.com/track/0GPzJxnNg076gXqvjk93Gb","_blank")}startPhase()}
+function resetTimer(){resetWorkout()}
+function finishWorkout(){clearInterval(timerId);running=false;const k="w"+state.week;state.done[k]=(state.done[k]||0)+1;saveState();renderAll();alert("Einheit gespeichert.");show("home",document.querySelectorAll(".tab")[0])}
 function todayStr(){return new Date().toISOString().slice(0,10)}
 function logWalk(km){const today=todayStr();const idx=state.walks.findIndex(w=>w.date===today);if(idx>-1&&state.walks[idx].km===km){state.walks.splice(idx,1)}else if(idx>-1){state.walks[idx].km=km}else{state.walks.push({date:today,km})}saveState();renderWalking()}
 function weekStart(d){const t=new Date(d);const dow=(t.getDay()+6)%7;t.setDate(t.getDate()-dow);t.setHours(0,0,0,0);return t.getTime()}
