@@ -69,6 +69,7 @@ canvas{width:100%;height:220px;background:#fbfcfc;border:1px solid var(--border)
 </section>
 
 <section id="training">
+<div class="card"><h2>Musik</h2><p class="small">Vor dem Training: Spotify öffnen, Song starten, dann manuell zur App zurückkehren.</p><button class="secondary full" onclick="startMusic()">▶ Start der Musik</button></div>
 <div class="card"><div class="phase" id="phase">Bereit</div><div class="timer" id="timer">00:40</div><div class="round" id="roundInfo">Training</div>
 <div class="timer-actions"><button class="primary" id="timerBtn" onclick="toggleTimer()">Start</button><button class="ghost" onclick="resetTimer()">Zurücksetzen</button></div>
 <div class="grid2">
@@ -76,8 +77,9 @@ canvas{width:100%;height:220px;background:#fbfcfc;border:1px solid var(--border)
 <div class="checkrow"><input type="checkbox" id="sound" checked><label for="sound" style="margin:0">Signaltöne</label></div>
 </div></div>
 <div class="card"><h2 id="trainingTitle">Übungen</h2><div id="exerciseList"></div><button class="primary full" onclick="finishWorkout()">Einheit abschließen</button></div>
-<div class="card"><h2>Musik</h2><p class="small">Startet automatisch beim ersten "Start" – bleibt in der App, kein App-Wechsel.</p><div id="spotifyEmbed"></div><div class="stack" style="margin-top:10px">
+<div class="card"><h2>Weitere Musikoptionen</h2><div class="stack">
 <a class="btn secondary" target="_blank" href="https://music.apple.com/de/search?term=tabata%20workout">Apple Music</a>
+<a class="btn secondary" target="_blank" href="https://open.spotify.com/track/0GPzJxnNg076gXqvjk93Gb">Spotify (Link)</a>
 <a class="btn secondary" target="_blank" href="https://music.youtube.com/search?q=tabata%20workout">YouTube Music</a>
 </div></div>
 </section>
@@ -223,14 +225,15 @@ let seq=[],stepIdx=0,subPhase="work";
 function highlightExercise(s){document.querySelectorAll("#exerciseList .exercise").forEach(el=>el.classList.remove("current"));const el=document.getElementById("ex"+s.exIndex);if(el)el.classList.add("current")}
 function loadStep(){const rounds=state.mode==="travel"?1:plans[state.week].rounds;if(stepIdx>=seq.length){finishSequence();return}const s=seq[stepIdx];timeLeft=subPhase==="work"?s.duration:REST_SECONDS;document.getElementById("phase").textContent=subPhase==="work"?s.name:"Pause";document.getElementById("phase").classList.toggle("rest",subPhase==="rest");document.getElementById("roundInfo").textContent=state.mode==="travel"?"Reiseprogramm":(s.section==="Warm-up"||s.section==="Cooldown"?s.section:`${s.section} · Runde ${s.round} von ${rounds}`);updateTimer();document.getElementById("timerBtn").textContent="Start";highlightExercise(s)}
 let musicOpened=false;
-function resetWorkout(){clearInterval(timerId);running=false;seq=buildSequence();stepIdx=0;subPhase="work";musicOpened=false;const emb=document.getElementById("spotifyEmbed");if(emb)emb.innerHTML="";if(seq.length)loadStep();else{document.getElementById("phase").textContent="Bereit";document.getElementById("phase").classList.remove("rest")}}
+function resetWorkout(){clearInterval(timerId);running=false;seq=buildSequence();stepIdx=0;subPhase="work";musicOpened=false;if(seq.length)loadStep();else{document.getElementById("phase").textContent="Bereit";document.getElementById("phase").classList.remove("rest")}}
 function markExerciseDone(step){const el=document.getElementById("ex"+step.exIndex);if(el)el.classList.add("done")}
 function startPhase(){running=true;document.getElementById("timerBtn").textContent="Pause";const s=seq[stepIdx];if(subPhase==="work"){beep(1000,.15);speak(s.name)}else{beep(600,.15);speak("Pause")}timerId=setInterval(tick,1000)}
 function tick(){timeLeft--;updateTimer();if(timeLeft===10&&subPhase==="work")speak("Noch zehn Sekunden");if(timeLeft<=3&&timeLeft>0)beep(700,.06);if(timeLeft<=0){clearInterval(timerId);running=false;beep(1200,.3);navigator.vibrate?.([200,100,200]);advanceStep()}}
 function advanceStep(){if(subPhase==="work"){markExerciseDone(seq[stepIdx]);if(stepIdx===seq.length-1){finishSequence();return}subPhase="rest"}else{stepIdx++;subPhase="work"}loadStep();startPhase()}
 function finishSequence(){clearInterval(timerId);running=false;document.getElementById("phase").textContent="Einheit fertig!";document.getElementById("phase").classList.remove("rest");document.getElementById("timerBtn").textContent="Start";speak("Einheit fertig, gut gemacht");beep(1400,.4)}
 function updateTimer(){document.getElementById("timer").textContent=`${String(Math.floor(timeLeft/60)).padStart(2,"0")}:${String(timeLeft%60).padStart(2,"0")}`}
-function toggleTimer(){if(running){clearInterval(timerId);running=false;document.getElementById("timerBtn").textContent="Start";return}if(stepIdx>=seq.length){resetWorkout()}if(!musicOpened&&stepIdx===0&&subPhase==="work"){musicOpened=true;const c=document.getElementById("spotifyEmbed");if(c)c.innerHTML=`<iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/0GPzJxnNg076gXqvjk93Gb?utm_source=generator&autoplay=1" width="100%" height="152" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>`}startPhase()}
+function toggleTimer(){if(running){clearInterval(timerId);running=false;document.getElementById("timerBtn").textContent="Start";return}if(stepIdx>=seq.length){resetWorkout()}startPhase()}
+function startMusic(){window.open("https://open.spotify.com/track/0GPzJxnNg076gXqvjk93Gb","_blank")}
 function resetTimer(){resetWorkout()}
 function finishWorkout(){clearInterval(timerId);running=false;const k="w"+state.week;state.done[k]=(state.done[k]||0)+1;saveState();renderAll();alert("Einheit gespeichert.");show("home",document.querySelectorAll(".tab")[0])}
 function todayStr(){return new Date().toISOString().slice(0,10)}
