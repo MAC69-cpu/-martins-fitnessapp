@@ -44,7 +44,7 @@ canvas{width:100%;height:220px;background:#fbfcfc;border:1px solid var(--border)
 </div>
 <div class="card"><h2>Training starten</h2><div class="stack">
 <button class="primary full" onclick="startHome()">Zuhause · 10–15 Minuten</button>
-<button class="secondary full" onclick="startTravel()">Unterwegs · 6 Minuten</button>
+<button class="secondary full" onclick="startTravel()">Unterwegs · 5 Minuten</button>
 </div></div>
 <div class="card"><h2>Walking</h2><div class="week-row" style="grid-template-columns:repeat(3,1fr)">
 <button class="week-btn" id="walk5" onclick="logWalk(5)">5 km</button>
@@ -69,7 +69,7 @@ canvas{width:100%;height:220px;background:#fbfcfc;border:1px solid var(--border)
 </section>
 
 <section id="training">
-<div class="card"><h2>Musik</h2><p class="small">Vor dem Training: Spotify öffnen, Song starten, dann manuell zur App zurückkehren.</p><button class="secondary full" onclick="startMusic()">▶ Start der Musik</button></div>
+<div class="card" id="musicCard"><h2>Musik</h2><p class="small">Vor dem Training: Spotify öffnen, Song starten, dann manuell zur App zurückkehren.</p><button class="secondary full" onclick="startMusic()">▶ Start der Musik</button></div>
 <div class="card"><div class="phase" id="phase">Bereit</div><div class="timer" id="timer">00:40</div><div class="round" id="roundInfo">Training</div>
 <div class="timer-actions"><button class="primary" id="timerBtn" onclick="toggleTimer()">Start</button><button class="ghost" onclick="resetTimer()">Zurücksetzen</button></div>
 <div class="grid2">
@@ -132,7 +132,7 @@ canvas{width:100%;height:220px;background:#fbfcfc;border:1px solid var(--border)
 function cd(detail,cue){return{name:"Cooldown",detail,cue,section:"Cooldown"}}
 function ex(name,detail,cue,section){return{name,detail,cue,section}}
 const plans={
-1:{goal:"Technik lernen",rounds:2,target:3,ex:[
+1:{goal:"Technik lernen",rounds:2,target:7,ex:[
  ex("Deadlift","12 Wiederholungen","Rücken neutral, Hüfte zurück","Kraft"),
  ex("Goblet Squat","10 Wiederholungen","Kettlebell nah am Körper","Kraft"),
  ex("Half Kneeling Clean & Press","8 je Seite","Ruhig, kein Schwung aus dem Rücken","Core / Stabilität"),
@@ -140,7 +140,7 @@ const plans={
  ex("Half Kneeling Row","10 je Seite","Rumpf ruhig halten","Core / Stabilität"),
  ex("Pullover","10 Wiederholungen","Kontrolliert, Rippen nicht aufstellen","Core / Stabilität"),
  cd("2 Minuten","Dehnen, ruhig ausatmen")]},
-2:{goal:"Technik festigen",rounds:2,target:3,ex:[
+2:{goal:"Technik festigen",rounds:2,target:7,ex:[
  ex("Deadlift","15 Wiederholungen","Langsam absenken","Kraft"),
  ex("Goblet Squat","12 Wiederholungen","3 Sekunden nach unten","Kraft"),
  ex("Half Kneeling Clean & Press","10 je Seite","Sauberer Übergang ins Pressen","Core / Stabilität"),
@@ -148,7 +148,7 @@ const plans={
  ex("Half Kneeling Row","12 je Seite","Schulterblatt aktiv einsetzen","Core / Stabilität"),
  ex("Pullover","12 Wiederholungen","Atmung mit der Bewegung koppeln","Core / Stabilität"),
  cd("2 Minuten","Dehnen, ruhig ausatmen")]},
-3:{goal:"Kraftausdauer",rounds:3,target:3,ex:[
+3:{goal:"Kraftausdauer",rounds:3,target:7,ex:[
  ex("Deadlift","15 Wiederholungen","Saubere Hüftbewegung","Kraft"),
  ex("Goblet Squat","12 Wiederholungen","Ruhiges Tempo","Kraft"),
  ex("Half Kneeling Clean & Press","10 je Seite","Kontrolle vor Tempo","Core / Stabilität"),
@@ -156,7 +156,7 @@ const plans={
  ex("Half Kneeling Row","12 je Seite","Ellbogen nah am Körper","Core / Stabilität"),
  ex("Pullover","12 Wiederholungen","Bauchspannung halten","Core / Stabilität"),
  cd("2 Minuten","Dehnen, ruhig ausatmen")]},
-4:{goal:"Stabilität",rounds:3,target:3,ex:[
+4:{goal:"Stabilität",rounds:3,target:7,ex:[
  ex("Romanian Deadlift","15 Wiederholungen","Knie leicht gebeugt","Kraft"),
  ex("Goblet Squat","15 Wiederholungen","Schmerzfreie Tiefe","Kraft"),
  ex("Half Kneeling Clean & Press","12 je Seite","Stabiler Stand, kein Wackeln","Core / Stabilität"),
@@ -164,7 +164,7 @@ const plans={
  ex("Half Kneeling Row","12 je Seite","Kontrolliert zurückführen","Core / Stabilität"),
  ex("Pullover","12 Wiederholungen","Schmerzfreier Bewegungsradius","Core / Stabilität"),
  cd("2 Minuten","Dehnen, ruhig ausatmen")]},
-5:{goal:"Kurze Intervalle",rounds:3,target:3,ex:[
+5:{goal:"Kurze Intervalle",rounds:3,target:7,ex:[
  ex("Deadlift","40 Sekunden","Gleichmäßig","Kraft"),
  ex("Goblet Squat","40 Sekunden","Kontrolliert","Kraft"),
  ex("Half Kneeling Clean & Press","40 Sekunden je Seite","Sauberer Rhythmus","Core / Stabilität"),
@@ -172,7 +172,7 @@ const plans={
  ex("Half Kneeling Row","40 Sekunden je Seite","Sicherer Griff","Core / Stabilität"),
  ex("Pullover","40 Sekunden","Ruhige Atmung","Core / Stabilität"),
  cd("2 Minuten","Dehnen, ruhig ausatmen")]},
-6:{goal:"Leistung steigern",rounds:3,target:3,ex:[
+6:{goal:"Leistung steigern",rounds:3,target:7,ex:[
  ex("Deadlift","45 Sekunden","Qualität vor Tempo","Kraft"),
  ex("Goblet Squat","45 Sekunden","Ruhig atmen","Kraft"),
  ex("Half Kneeling Clean & Press","45 Sekunden je Seite","Saubere Form","Core / Stabilität"),
@@ -180,7 +180,7 @@ const plans={
  ex("Half Kneeling Row","45 Sekunden je Seite","Griff locker","Core / Stabilität"),
  ex("Pullover","45 Sekunden","Kontrollierte Range","Core / Stabilität"),
  cd("2 Minuten","Dehnen, ruhig ausatmen")]},
-7:{goal:"Ganzkörper-Zirkel",rounds:3,target:3,ex:[
+7:{goal:"Ganzkörper-Zirkel",rounds:3,target:7,ex:[
  ex("Deadlift","40 Sekunden","Gleichmäßig","Kraft"),
  ex("Goblet Squat","40 Sekunden","Kontrolliert","Kraft"),
  ex("Half Kneeling Clean & Press","40 Sekunden je Seite","Schultern tief","Core / Stabilität"),
@@ -188,7 +188,7 @@ const plans={
  ex("Half Kneeling Row","40 Sekunden je Seite","Ohne Schwung","Core / Stabilität"),
  ex("Pullover","40 Sekunden","Bauchspannung","Core / Stabilität"),
  cd("2 Minuten","Dehnen, ruhig ausatmen")]},
-8:{goal:"Abschlusswoche",rounds:3,target:3,ex:[
+8:{goal:"Abschlusswoche",rounds:3,target:7,ex:[
  ex("Deadlift","45 Sekunden","Kraftvoll und sauber","Kraft"),
  ex("Goblet Squat","45 Sekunden","Angenehme Tiefe","Kraft"),
  ex("Half Kneeling Clean & Press","45 Sekunden je Seite","Ruhig","Core / Stabilität"),
@@ -202,8 +202,7 @@ const travel=[
  ex("Wandliegestütz","12 Wiederholungen","Hände schulterbreit"),
  ex("Rückwärts-Ausfallschritt","6 je Seite","Bei Bedarf festhalten"),
  ex("Glute Bridge","15 Wiederholungen","Gesäß oben anspannen"),
- ex("Dead Bug","8 je Seite","Langsam"),
- ex("Gehen auf der Stelle","60 Sekunden","Zügig")
+ ex("Dead Bug","8 je Seite","Langsam")
 ];
 let state=JSON.parse(localStorage.getItem("martinsFitnessapp")||"{}");state.week=state.week||1;state.done=state.done||{};state.measurements=state.measurements||[];state.calories=state.calories||[];state.walks=state.walks||[];state.profile=state.profile||{sex:"male",age:56,height:180};state.mode="home";
 let timerId=null,running=false,timeLeft=40,audioCtx=null,deferredPrompt=null;
@@ -213,27 +212,32 @@ function show(id,btn){document.querySelectorAll("section").forEach(s=>s.classLis
 function speak(t){if(!document.getElementById("coach")?.checked||!("speechSynthesis"in window))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang="de-DE";u.rate=.95;speechSynthesis.speak(u)}
 function beep(f=880,d=.12){if(!document.getElementById("sound")?.checked)return;audioCtx=audioCtx||new(window.AudioContext||window.webkitAudioContext)();const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.frequency.value=f;o.connect(g);g.connect(audioCtx.destination);g.gain.setValueAtTime(.12,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+d);o.start();o.stop(audioCtx.currentTime+d)}
 function renderWeeks(){const c=document.getElementById("weeks");c.innerHTML="";for(let i=1;i<=8;i++){const b=document.createElement("button");b.className="week-btn"+(i===state.week?" active":"");b.textContent="W"+i;b.onclick=()=>{state.week=i;saveState();renderAll()};c.appendChild(b)}}
-function renderPlan(){const p=plans[state.week];let last=null,body="";p.ex.forEach(x=>{if(x.section!==last){body+=`<h3 style="margin-top:16px;color:var(--primary);font-size:.95rem;text-transform:uppercase;letter-spacing:.03em">${x.section}</h3>`;last=x.section}body+=`<div class="exercise"><h3>${x.name}</h3><div>${x.detail}</div><div class="small">${x.cue}</div><a class="video" target="_blank" href="https://www.youtube.com/results?search_query=${encodeURIComponent(x.name+' Technik deutsch')}">Technikvideo</a></div>`});document.getElementById("planCard").innerHTML=`<h2>Woche ${state.week}: ${p.goal}</h2><p><strong>${p.target} Einheiten</strong> · ${p.rounds} Runden Kraft/Core</p>${body}<p class="small">Unterwegs ersetzt das 6-Minuten-Programm eine Einheit.</p>`}
+function renderPlan(){const p=plans[state.week];let last=null,body="";p.ex.forEach(x=>{if(x.section!==last){body+=`<h3 style="margin-top:16px;color:var(--primary);font-size:.95rem;text-transform:uppercase;letter-spacing:.03em">${x.section}</h3>`;last=x.section}body+=`<div class="exercise"><h3>${x.name}</h3><div>${x.detail}</div><div class="small">${x.cue}</div><a class="video" target="_blank" href="https://www.youtube.com/results?search_query=${encodeURIComponent(x.name+' Technik deutsch')}">Technikvideo</a><a class="video" target="_blank" href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(x.name+' kettlebell Übung')}">Bild ansehen</a></div>`});document.getElementById("planCard").innerHTML=`<h2>Woche ${state.week}: ${p.goal}</h2><p><strong>${p.target} Einheiten</strong> · ${p.rounds} Runden Kraft/Core</p>${body}<p class="small">Unterwegs ersetzt das 5-Minuten-Programm eine Einheit.</p>`}
 function exercises(){return state.mode==="travel"?travel:plans[state.week].ex}
-function renderTraining(){document.getElementById("trainingTitle").textContent=state.mode==="travel"?"Unterwegs · 6 Minuten":`Zuhause · Woche ${state.week}`;let last=null,body="";exercises().forEach((x,i)=>{if(x.section&&x.section!==last){body+=`<h3 style="margin-top:14px;color:var(--primary);font-size:.9rem;text-transform:uppercase;letter-spacing:.03em">${x.section}</h3>`;last=x.section}body+=`<div class="exercise" id="ex${i}"><div class="exercise-head"><div><h3>${x.name}</h3><div>${x.detail}</div><div class="small">${x.cue}</div></div><button class="secondary" onclick="document.getElementById('ex${i}').classList.toggle('done')">✓</button></div></div>`});document.getElementById("exerciseList").innerHTML=body;resetWorkout()}
+let originalOrder=[];
+function renderTraining(){const mc=document.getElementById("musicCard");if(mc)mc.classList.remove("hidden");document.getElementById("trainingTitle").textContent=state.mode==="travel"?"Unterwegs · 5 Minuten":`Zuhause · Woche ${state.week}`;let last=null,body="";originalOrder=[];exercises().forEach((x,i)=>{if(x.section&&x.section!==last){body+=`<h3 style="margin-top:14px;color:var(--primary);font-size:.9rem;text-transform:uppercase;letter-spacing:.03em">${x.section}</h3>`;last=x.section}originalOrder.push("ex"+i);body+=`<div class="exercise" id="ex${i}"><div class="exercise-head"><div><h3>${x.name}</h3><div>${x.detail}</div><div class="small">${x.cue}</div><a class="video" target="_blank" href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(x.name+' Übung')}">Bild ansehen</a></div><button class="secondary" onclick="toggleDone(${i})">✓</button></div></div>`});document.getElementById("exerciseList").innerHTML=body;resetWorkout()}
+function toggleDone(i){const el=document.getElementById("ex"+i);if(el)el.classList.toggle("done");reorderExerciseList()}
+function reorderExerciseList(){const list=document.getElementById("exerciseList");if(!list)return;const notDone=[],done=[];originalOrder.forEach(id=>{const el=document.getElementById(id);if(!el)return;(el.classList.contains("done")?done:notDone).push(el)});[...notDone,...done].forEach(el=>list.appendChild(el))}
 function startHome(){state.mode="home";saveState();renderTraining();show("training",document.querySelectorAll(".tab")[2])}
 function startTravel(){state.mode="travel";saveState();renderTraining();show("training",document.querySelectorAll(".tab")[2])}
-const WORK_DEFAULT=30,REST_SECONDS=10;
-function parseDuration(detail){const s=detail.match(/(\d+)\s*Sekunden/);if(s)return parseInt(s[1]);const m=detail.match(/(\d+)\s*Minuten/);if(m)return parseInt(m[1])*60;return WORK_DEFAULT}
+const WORK_HOME=30,REST_HOME=10,WORK_TRAVEL=40,REST_TRAVEL=20;
+function currentWorkDefault(){return state.mode==="travel"?WORK_TRAVEL:WORK_HOME}
+function currentRestSeconds(){return state.mode==="travel"?REST_TRAVEL:REST_HOME}
+function parseDuration(detail){const s=detail.match(/(\d+)\s*Sekunden/);if(s)return parseInt(s[1]);const m=detail.match(/(\d+)\s*Minuten/);if(m)return parseInt(m[1])*60;return currentWorkDefault()}
 function buildSequence(){const list=exercises(),rounds=state.mode==="travel"?1:plans[state.week].rounds,steps=[];list.forEach((x,i)=>{if(x.section==="Warm-up")steps.push({name:x.name,detail:x.detail,cue:x.cue,section:x.section,duration:parseDuration(x.detail),round:1,exIndex:i})});for(let r=1;r<=rounds;r++){list.forEach((x,i)=>{if(x.section!=="Warm-up"&&x.section!=="Cooldown")steps.push({name:x.name,detail:x.detail,cue:x.cue,section:x.section||"Übungen",duration:parseDuration(x.detail),round:r,exIndex:i})})}list.forEach((x,i)=>{if(x.section==="Cooldown")steps.push({name:x.name,detail:x.detail,cue:x.cue,section:x.section,duration:parseDuration(x.detail),round:1,exIndex:i})});return steps}
 let seq=[],stepIdx=0,subPhase="work";
-function highlightExercise(s){document.querySelectorAll("#exerciseList .exercise").forEach(el=>el.classList.remove("current"));const el=document.getElementById("ex"+s.exIndex);if(el)el.classList.add("current")}
-function loadStep(){const rounds=state.mode==="travel"?1:plans[state.week].rounds;if(stepIdx>=seq.length){finishSequence();return}const s=seq[stepIdx];timeLeft=subPhase==="work"?s.duration:REST_SECONDS;document.getElementById("phase").textContent=subPhase==="work"?s.name:"Pause";document.getElementById("phase").classList.toggle("rest",subPhase==="rest");document.getElementById("roundInfo").textContent=state.mode==="travel"?"Reiseprogramm":(s.section==="Warm-up"||s.section==="Cooldown"?s.section:`${s.section} · Runde ${s.round} von ${rounds}`);updateTimer();document.getElementById("timerBtn").textContent="Start";highlightExercise(s)}
+function highlightExercise(s){document.querySelectorAll("#exerciseList .exercise").forEach(el=>el.classList.remove("current"));if(subPhase==="work"){const el=document.getElementById("ex"+s.exIndex);if(el){el.classList.remove("done");el.classList.add("current")}}reorderExerciseList()}
+function loadStep(){const rounds=state.mode==="travel"?1:plans[state.week].rounds;if(stepIdx>=seq.length){finishSequence();return}const s=seq[stepIdx];timeLeft=subPhase==="work"?s.duration:currentRestSeconds();document.getElementById("phase").textContent=subPhase==="work"?s.name:"Pause";document.getElementById("phase").classList.toggle("rest",subPhase==="rest");document.getElementById("roundInfo").textContent=state.mode==="travel"?"Reiseprogramm":(s.section==="Warm-up"||s.section==="Cooldown"?s.section:`${s.section} · Runde ${s.round} von ${rounds}`);updateTimer();document.getElementById("timerBtn").textContent="Start";highlightExercise(s)}
 let musicOpened=false;
 function resetWorkout(){clearInterval(timerId);running=false;seq=buildSequence();stepIdx=0;subPhase="work";musicOpened=false;if(seq.length)loadStep();else{document.getElementById("phase").textContent="Bereit";document.getElementById("phase").classList.remove("rest")}}
-function markExerciseDone(step){const el=document.getElementById("ex"+step.exIndex);if(el)el.classList.add("done")}
+function markExerciseDone(step){const el=document.getElementById("ex"+step.exIndex);if(el)el.classList.add("done");reorderExerciseList()}
 function startPhase(){running=true;document.getElementById("timerBtn").textContent="Pause";const s=seq[stepIdx];if(subPhase==="work"){beep(1000,.15);speak(s.name)}else{beep(600,.15);speak("Pause")}timerId=setInterval(tick,1000)}
 function tick(){timeLeft--;updateTimer();if(timeLeft===10&&subPhase==="work")speak("Noch zehn Sekunden");if(timeLeft<=3&&timeLeft>0)beep(700,.06);if(timeLeft<=0){clearInterval(timerId);running=false;beep(1200,.3);navigator.vibrate?.([200,100,200]);advanceStep()}}
 function advanceStep(){if(subPhase==="work"){markExerciseDone(seq[stepIdx]);if(stepIdx===seq.length-1){finishSequence();return}subPhase="rest"}else{stepIdx++;subPhase="work"}loadStep();startPhase()}
 function finishSequence(){clearInterval(timerId);running=false;document.getElementById("phase").textContent="Einheit fertig!";document.getElementById("phase").classList.remove("rest");document.getElementById("timerBtn").textContent="Start";speak("Einheit fertig, gut gemacht");beep(1400,.4)}
 function updateTimer(){document.getElementById("timer").textContent=`${String(Math.floor(timeLeft/60)).padStart(2,"0")}:${String(timeLeft%60).padStart(2,"0")}`}
 function toggleTimer(){if(running){clearInterval(timerId);running=false;document.getElementById("timerBtn").textContent="Start";return}if(stepIdx>=seq.length){resetWorkout()}startPhase()}
-function startMusic(){window.open("https://open.spotify.com/track/0GPzJxnNg076gXqvjk93Gb","_blank")}
+function startMusic(){window.open("https://open.spotify.com/track/0GPzJxnNg076gXqvjk93Gb","_blank");const c=document.getElementById("musicCard");if(c)c.classList.add("hidden")}
 function resetTimer(){resetWorkout()}
 function finishWorkout(){clearInterval(timerId);running=false;const k="w"+state.week;state.done[k]=(state.done[k]||0)+1;saveState();renderAll();alert("Einheit gespeichert.");show("home",document.querySelectorAll(".tab")[0])}
 function todayStr(){return new Date().toISOString().slice(0,10)}
