@@ -69,6 +69,330 @@ canvas{width:100%;height:220px;background:#fbfcfc;border:1px solid var(--border)
 </section>
 
 <section id="training">
+<div class="card" id="musicCard"><h2>Musik</h2><p class="small">Vor dem Training: Spotify öffnen, Song starten, dann manuell zur App zurückkehren.</p><a class="btn primary full" target="_blank" href="https://open.spotify.com/track/0GPzJxnNg076gXqvjk93Gb" onclick="const c=document.getElementById('musicCard');if(c)c.classList.add('hidden')">▶ Start der Musik</a></div>
+<div class="card"><div class="phase" id="phase">Bereit</div><div class="timer" id="timer">00:40</div><div class="round" id="roundInfo">Training</div>
+<div class="timer-actions"><button class="primary" id="timerBtn" onclick="toggleTimer()">Start</button><button class="ghost" onclick="resetTimer()">Zurücksetzen</button></div>
+<div class="grid2">
+<div class="checkrow"><input type="checkbox" id="coach" checked><label for="coach" style="margin:0">Sprachcoach</label></div>
+<div class="checkrow"><input type="checkbox" id="sound" checked><label for="sound" style="margin:0">Signaltöne</label></div>
+</div></div>
+<div class="card"><h2 id="trainingTitle">Übungen</h2><div id="exerciseList"></div><button class="primary full" onclick="finishWorkout()">Einheit abschließen</button></div>
+<div class="card"><h2>Weitere Musikoptionen</h2><div class="stack">
+<a class="btn secondary" target="_blank" href="https://music.apple.com/de/search?term=tabata%20workout">Apple Music</a>
+<a class="btn secondary" target="_blank" href="https://open.spotify.com/track/0GPzJxnNg076gXqvjk93Gb">Spotify (Link)</a>
+<a class="btn secondary" target="_blank" href="https://music.youtube.com/search?q=tabata%20workout">YouTube Music</a>
+</div></div>
+</section>
+
+<section id="measure">
+<div class="card"><h2>Erfolg dokumentieren</h2><label>Gewicht in kg</label><input id="weight" type="number" step="0.1" placeholder="84,0">
+<label>Bauchumfang in cm</label><input id="waist" type="number" step="0.5" placeholder="98,0">
+<label>Griffgefühl</label><select id="grip"><option>gut</option><option>mittel</option><option>schwach</option></select>
+<button class="primary full" style="margin-top:14px" onclick="saveMeasurement()">Messung speichern</button>
+<p class="small">Einmal pro Woche morgens, nach dem Toilettengang und vor dem Frühstück messen.</p></div>
+
+<div class="card">
+<h2>Tagesverbrauch erfassen</h2>
+<label for="sex">Geschlecht für Grundumsatz-Schätzung</label>
+<select id="sex"><option value="male">Männlich</option><option value="female">Weiblich</option></select>
+<label for="age">Alter</label><input id="age" type="number" value="56">
+<label for="height">Größe in cm</label><input id="height" type="number" value="180">
+<label for="activeCalories">Aktivitätskalorien heute</label><input id="activeCalories" type="number" placeholder="z. B. 650">
+<label for="foodCalories">Gegessene Kalorien heute (optional)</label><input id="foodCalories" type="number" placeholder="z. B. 2100">
+<button class="primary full" style="margin-top:14px" onclick="saveCalories()">Kalorien speichern</button>
+<p class="small">Die App schätzt den Grundumsatz aus Alter, Größe, Gewicht und Geschlecht. Aktivitätskalorien trägst du manuell aus Apple Health oder deiner Uhr ein.</p>
+</div>
+<div class="grid2">
+<div class="card"><div class="small">Geschätzter Grundumsatz</div><div class="metric" id="bmrMetric">–</div></div>
+<div class="card"><div class="small">Heutiger Tagesverbrauch</div><div class="metric" id="burnMetric">–</div></div>
+</div>
+<div class="card"><div class="small">Heutige Kalorienbilanz</div><div class="metric" id="balanceMetric">–</div><div class="small" id="balanceHint"></div></div>
+<div class="grid2"><div class="card"><div class="small">Gewicht seit Start</div><div class="metric" id="weightDelta">–</div></div><div class="card"><div class="small">Bauch seit Start</div><div class="metric" id="waistDelta">–</div></div></div>
+<div class="card"><h2>Verlauf</h2><canvas id="chart" width="680" height="230"></canvas></div>
+<div class="card"><h2>Historie</h2><div style="overflow:auto"><table><thead><tr><th>Datum</th><th>Gewicht</th><th>Bauch</th><th>Griff</th></tr></thead><tbody id="history"></tbody></table></div></div>
+</section>
+
+<section id="more">
+<div class="card"><h2>Erinnerung</h2><p class="small">Die Erinnerung funktioniert, solange die App Benachrichtigungen im Browser unterstützt.</p>
+<label>Uhrzeit</label><input id="reminderTime" type="time" value="18:00"><button class="primary full" style="margin-top:12px" onclick="enableReminder()">Erinnerung aktivieren</button></div>
+<div class="card"><h2>App installieren</h2><button class="secondary full" id="installBtn" onclick="installApp()">Zum Home-Bildschirm hinzufügen</button><p class="small">Auf dem iPhone: Safari → Teilen → Zum Home-Bildschirm.</p></div>
+<div class="card"><button class="danger full" onclick="resetAll()">Alle Daten zurücksetzen</button></div>
+</section>
+</div>
+
+<nav class="tabs"><div class="tabs-inner">
+<button class="tab active" onclick="show('home',this)">Start</button>
+<button class="tab" onclick="show('plan',this)">Plan</button>
+<button class="tab" onclick="show('training',this)">Training</button>
+<button class="tab" onclick="show('measure',this)">Fortschritt</button>
+<button class="tab" onclick="show('more',this)">Mehr</button>
+</div></nav>
+
+<script>
+function cd(detail,cue){return{name:"Cooldown",detail,cue,section:"Cooldown"}}
+function ex(name,detail,cue,section){return{name,detail,cue,section}}
+const plans={
+1:{goal:"Technik lernen",rounds:2,target:7,ex:[
+ ex("Deadlift","12 Wiederholungen","Rücken neutral, Hüfte zurück","Kraft"),
+ ex("Goblet Squat","10 Wiederholungen","Kettlebell nah am Körper","Kraft"),
+ ex("Half Kneeling Clean & Press","8 je Seite","Ruhig, kein Schwung aus dem Rücken","Core / Stabilität"),
+ ex("Half Kneeling Halo","6 je Richtung, je Seite","Langsam ums Gesicht führen","Core / Stabilität"),
+ ex("Half Kneeling Row","10 je Seite","Rumpf ruhig halten","Core / Stabilität"),
+ ex("Pullover","10 Wiederholungen","Kontrolliert, Rippen nicht aufstellen","Core / Stabilität"),
+ cd("2 Minuten","Dehnen, ruhig ausatmen")]},
+2:{goal:"Technik festigen",rounds:2,target:7,ex:[
+ ex("Deadlift","15 Wiederholungen","Langsam absenken","Kraft"),
+ ex("Goblet Squat","12 Wiederholungen","3 Sekunden nach unten","Kraft"),
+ ex("Half Kneeling Clean & Press","10 je Seite","Sauberer Übergang ins Pressen","Core / Stabilität"),
+ ex("Half Kneeling Halo","8 je Richtung, je Seite","Rumpf bleibt aufrecht","Core / Stabilität"),
+ ex("Half Kneeling Row","12 je Seite","Schulterblatt aktiv einsetzen","Core / Stabilität"),
+ ex("Pullover","12 Wiederholungen","Atmung mit der Bewegung koppeln","Core / Stabilität"),
+ cd("2 Minuten","Dehnen, ruhig ausatmen")]},
+3:{goal:"Kraftausdauer",rounds:3,target:7,ex:[
+ ex("Deadlift","15 Wiederholungen","Saubere Hüftbewegung","Kraft"),
+ ex("Goblet Squat","12 Wiederholungen","Ruhiges Tempo","Kraft"),
+ ex("Half Kneeling Clean & Press","10 je Seite","Kontrolle vor Tempo","Core / Stabilität"),
+ ex("Half Kneeling Halo","8 je Richtung, je Seite","Ellenbogen nah am Kopf","Core / Stabilität"),
+ ex("Half Kneeling Row","12 je Seite","Ellbogen nah am Körper","Core / Stabilität"),
+ ex("Pullover","12 Wiederholungen","Bauchspannung halten","Core / Stabilität"),
+ cd("2 Minuten","Dehnen, ruhig ausatmen")]},
+4:{goal:"Stabilität",rounds:3,target:7,ex:[
+ ex("Romanian Deadlift","15 Wiederholungen","Knie leicht gebeugt","Kraft"),
+ ex("Goblet Squat","15 Wiederholungen","Schmerzfreie Tiefe","Kraft"),
+ ex("Half Kneeling Clean & Press","12 je Seite","Stabiler Stand, kein Wackeln","Core / Stabilität"),
+ ex("Half Kneeling Halo","10 je Richtung, je Seite","Rumpf bleibt zentriert","Core / Stabilität"),
+ ex("Half Kneeling Row","12 je Seite","Kontrolliert zurückführen","Core / Stabilität"),
+ ex("Pullover","12 Wiederholungen","Schmerzfreier Bewegungsradius","Core / Stabilität"),
+ cd("2 Minuten","Dehnen, ruhig ausatmen")]},
+5:{goal:"Kurze Intervalle",rounds:3,target:7,ex:[
+ ex("Deadlift","40 Sekunden","Gleichmäßig","Kraft"),
+ ex("Goblet Squat","40 Sekunden","Kontrolliert","Kraft"),
+ ex("Half Kneeling Clean & Press","40 Sekunden je Seite","Sauberer Rhythmus","Core / Stabilität"),
+ ex("Half Kneeling Halo","30 Sekunden je Seite","Langsam, kontrolliert","Core / Stabilität"),
+ ex("Half Kneeling Row","40 Sekunden je Seite","Sicherer Griff","Core / Stabilität"),
+ ex("Pullover","40 Sekunden","Ruhige Atmung","Core / Stabilität"),
+ cd("2 Minuten","Dehnen, ruhig ausatmen")]},
+6:{goal:"Leistung steigern",rounds:3,target:7,ex:[
+ ex("Deadlift","45 Sekunden","Qualität vor Tempo","Kraft"),
+ ex("Goblet Squat","45 Sekunden","Ruhig atmen","Kraft"),
+ ex("Half Kneeling Clean & Press","45 Sekunden je Seite","Saubere Form","Core / Stabilität"),
+ ex("Half Kneeling Halo","35 Sekunden je Seite","Kein Hohlkreuz","Core / Stabilität"),
+ ex("Half Kneeling Row","45 Sekunden je Seite","Griff locker","Core / Stabilität"),
+ ex("Pullover","45 Sekunden","Kontrollierte Range","Core / Stabilität"),
+ cd("2 Minuten","Dehnen, ruhig ausatmen")]},
+7:{goal:"Ganzkörper-Zirkel",rounds:3,target:7,ex:[
+ ex("Deadlift","40 Sekunden","Gleichmäßig","Kraft"),
+ ex("Goblet Squat","40 Sekunden","Kontrolliert","Kraft"),
+ ex("Half Kneeling Clean & Press","40 Sekunden je Seite","Schultern tief","Core / Stabilität"),
+ ex("Half Kneeling Halo","30 Sekunden je Seite","Rumpf stabil","Core / Stabilität"),
+ ex("Half Kneeling Row","40 Sekunden je Seite","Ohne Schwung","Core / Stabilität"),
+ ex("Pullover","40 Sekunden","Bauchspannung","Core / Stabilität"),
+ cd("2 Minuten","Dehnen, ruhig ausatmen")]},
+8:{goal:"Abschlusswoche",rounds:3,target:7,ex:[
+ ex("Deadlift","45 Sekunden","Kraftvoll und sauber","Kraft"),
+ ex("Goblet Squat","45 Sekunden","Angenehme Tiefe","Kraft"),
+ ex("Half Kneeling Clean & Press","45 Sekunden je Seite","Ruhig","Core / Stabilität"),
+ ex("Half Kneeling Halo","35 Sekunden je Seite","Kontrolliert","Core / Stabilität"),
+ ex("Half Kneeling Row","45 Sekunden je Seite","Griff locker","Core / Stabilität"),
+ ex("Pullover","45 Sekunden","Abschluss, saubere Form","Core / Stabilität"),
+ cd("2 Minuten","Dehnen, ruhig ausatmen")]}
+};
+const travel=[
+ ex("Stuhl-Kniebeuge","12 Wiederholungen","Zum Stuhl absenken"),
+ ex("Wandliegestütz","12 Wiederholungen","Hände schulterbreit"),
+ ex("Rückwärts-Ausfallschritt","6 je Seite","Bei Bedarf festhalten"),
+ ex("Glute Bridge","15 Wiederholungen","Gesäß oben anspannen"),
+ ex("Dead Bug","8 je Seite","Langsam")
+];
+let state=JSON.parse(localStorage.getItem("martinsFitnessapp")||"{}");state.week=state.week||1;state.done=state.done||{};state.measurements=state.measurements||[];state.calories=state.calories||[];state.walks=state.walks||[];state.profile=state.profile||{sex:"male",age:56,height:180};state.mode="home";
+let timerId=null,running=false,timeLeft=40,audioCtx=null,deferredPrompt=null;
+
+function saveState(){localStorage.setItem("martinsFitnessapp",JSON.stringify(state))}
+function show(id,btn){document.querySelectorAll("section").forEach(s=>s.classList.remove("active"));document.getElementById(id).classList.add("active");document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));if(btn)btn.classList.add("active");if(id==="measure")drawChart()}
+function speak(t){if(!document.getElementById("coach")?.checked||!("speechSynthesis"in window))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang="de-DE";u.rate=.95;speechSynthesis.speak(u)}
+function beep(f=880,d=.12){if(!document.getElementById("sound")?.checked)return;audioCtx=audioCtx||new(window.AudioContext||window.webkitAudioContext)();const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.frequency.value=f;o.connect(g);g.connect(audioCtx.destination);g.gain.setValueAtTime(.12,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+d);o.start();o.stop(audioCtx.currentTime+d)}
+function renderWeeks(){const c=document.getElementById("weeks");c.innerHTML="";for(let i=1;i<=8;i++){const b=document.createElement("button");b.className="week-btn"+(i===state.week?" active":"");b.textContent="W"+i;b.onclick=()=>{state.week=i;saveState();renderAll()};c.appendChild(b)}}
+function renderPlan(){const p=plans[state.week];let last=null,body="";p.ex.forEach(x=>{if(x.section!==last){body+=`<h3 style="margin-top:16px;color:var(--primary);font-size:.95rem;text-transform:uppercase;letter-spacing:.03em">${x.section}</h3>`;last=x.section}body+=`<div class="exercise"><h3>${x.name}</h3><div>${x.detail}</div><div class="small">${x.cue}</div><a class="video" target="_blank" href="https://www.youtube.com/results?search_query=${encodeURIComponent(x.name+' Technik deutsch')}">Technikvideo</a><a class="video" target="_blank" href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(x.name+' kettlebell Übung')}">Bild ansehen</a></div>`});document.getElementById("planCard").innerHTML=`<h2>Woche ${state.week}: ${p.goal}</h2><p><strong>${p.target} Einheiten</strong> · ${p.rounds} Runden Kraft/Core</p>${body}<p class="small">Unterwegs ersetzt das 5-Minuten-Programm eine Einheit.</p>`}
+function exercises(){return state.mode==="travel"?travel:plans[state.week].ex}
+let originalOrder=[];
+function renderTraining(){const mc=document.getElementById("musicCard");if(mc)mc.classList.remove("hidden");document.getElementById("trainingTitle").textContent=state.mode==="travel"?"Unterwegs · 5 Minuten":`Zuhause · Woche ${state.week}`;let last=null,body="";originalOrder=[];exercises().forEach((x,i)=>{if(x.section&&x.section!==last){body+=`<h3 style="margin-top:14px;color:var(--primary);font-size:.9rem;text-transform:uppercase;letter-spacing:.03em">${x.section}</h3>`;last=x.section}originalOrder.push("ex"+i);body+=`<div class="exercise" id="ex${i}"><div class="exercise-head"><div><h3>${x.name}</h3><div>${x.detail}</div><div class="small">${x.cue}</div><a class="video" target="_blank" href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(x.name+' Übung')}">Bild ansehen</a></div><button class="secondary" onclick="toggleDone(${i})">✓</button></div></div>`});document.getElementById("exerciseList").innerHTML=body;resetWorkout()}
+function toggleDone(i){const el=document.getElementById("ex"+i);if(el)el.classList.toggle("done");reorderExerciseList()}
+function reorderExerciseList(){const list=document.getElementById("exerciseList");if(!list)return;const notDone=[],done=[];originalOrder.forEach(id=>{const el=document.getElementById(id);if(!el)return;(el.classList.contains("done")?done:notDone).push(el)});[...notDone,...done].forEach(el=>list.appendChild(el))}
+function startHome(){state.mode="home";saveState();renderTraining();show("training",document.querySelectorAll(".tab")[2])}
+function startTravel(){state.mode="travel";saveState();renderTraining();show("training",document.querySelectorAll(".tab")[2])}
+const WORK_HOME=30,REST_HOME=10,WORK_TRAVEL=40,REST_TRAVEL=20;
+function currentWorkDefault(){return state.mode==="travel"?WORK_TRAVEL:WORK_HOME}
+function currentRestSeconds(){return state.mode==="travel"?REST_TRAVEL:REST_HOME}
+function parseDuration(detail){const s=detail.match(/(\d+)\s*Sekunden/);if(s)return parseInt(s[1]);const m=detail.match(/(\d+)\s*Minuten/);if(m)return parseInt(m[1])*60;return currentWorkDefault()}
+function buildSequence(){const list=exercises(),rounds=state.mode==="travel"?1:plans[state.week].rounds,steps=[];list.forEach((x,i)=>{if(x.section==="Warm-up")steps.push({name:x.name,detail:x.detail,cue:x.cue,section:x.section,duration:parseDuration(x.detail),round:1,exIndex:i})});for(let r=1;r<=rounds;r++){list.forEach((x,i)=>{if(x.section!=="Warm-up"&&x.section!=="Cooldown")steps.push({name:x.name,detail:x.detail,cue:x.cue,section:x.section||"Übungen",duration:parseDuration(x.detail),round:r,exIndex:i})})}list.forEach((x,i)=>{if(x.section==="Cooldown")steps.push({name:x.name,detail:x.detail,cue:x.cue,section:x.section,duration:parseDuration(x.detail),round:1,exIndex:i})});return steps}
+let seq=[],stepIdx=0,subPhase="work";
+function highlightExercise(s){document.querySelectorAll("#exerciseList .exercise").forEach(el=>el.classList.remove("current"));if(subPhase==="work"){const el=document.getElementById("ex"+s.exIndex);if(el){el.classList.remove("done");el.classList.add("current")}}reorderExerciseList()}
+function loadStep(){const rounds=state.mode==="travel"?1:plans[state.week].rounds;if(stepIdx>=seq.length){finishSequence();return}const s=seq[stepIdx];timeLeft=subPhase==="work"?s.duration:currentRestSeconds();document.getElementById("phase").textContent=subPhase==="work"?s.name:"Pause";document.getElementById("phase").classList.toggle("rest",subPhase==="rest");document.getElementById("roundInfo").textContent=state.mode==="travel"?"Reiseprogramm":(s.section==="Warm-up"||s.section==="Cooldown"?s.section:`${s.section} · Runde ${s.round} von ${rounds}`);updateTimer();document.getElementById("timerBtn").textContent="Start";highlightExercise(s)}
+let musicOpened=false;
+function resetWorkout(){clearInterval(timerId);running=false;seq=buildSequence();stepIdx=0;subPhase="work";musicOpened=false;if(seq.length)loadStep();else{document.getElementById("phase").textContent="Bereit";document.getElementById("phase").classList.remove("rest")}}
+function markExerciseDone(step){const el=document.getElementById("ex"+step.exIndex);if(el)el.classList.add("done");reorderExerciseList()}
+function startPhase(){running=true;document.getElementById("timerBtn").textContent="Pause";const s=seq[stepIdx];if(subPhase==="work"){beep(1000,.15);speak(s.name)}else{beep(600,.15);speak("Pause")}timerId=setInterval(tick,1000)}
+function tick(){timeLeft--;updateTimer();if(timeLeft===10&&subPhase==="work")speak("Noch zehn Sekunden");if(timeLeft<=3&&timeLeft>0)beep(700,.06);if(timeLeft<=0){clearInterval(timerId);running=false;beep(1200,.3);navigator.vibrate?.([200,100,200]);advanceStep()}}
+function advanceStep(){if(subPhase==="work"){markExerciseDone(seq[stepIdx]);if(stepIdx===seq.length-1){finishSequence();return}subPhase="rest"}else{stepIdx++;subPhase="work"}loadStep();startPhase()}
+function finishSequence(){clearInterval(timerId);running=false;document.getElementById("phase").textContent="Einheit fertig!";document.getElementById("phase").classList.remove("rest");document.getElementById("timerBtn").textContent="Start";speak("Einheit fertig, gut gemacht");beep(1400,.4)}
+function updateTimer(){document.getElementById("timer").textContent=`${String(Math.floor(timeLeft/60)).padStart(2,"0")}:${String(timeLeft%60).padStart(2,"0")}`}
+function toggleTimer(){if(running){clearInterval(timerId);running=false;document.getElementById("timerBtn").textContent="Start";return}if(stepIdx>=seq.length){resetWorkout()}startPhase()}
+function resetTimer(){resetWorkout()}
+function finishWorkout(){clearInterval(timerId);running=false;const k="w"+state.week;state.done[k]=(state.done[k]||0)+1;saveState();renderAll();alert("Einheit gespeichert.");show("home",document.querySelectorAll(".tab")[0])}
+function todayStr(){return new Date().toISOString().slice(0,10)}
+function logWalk(km){const today=todayStr();const idx=state.walks.findIndex(w=>w.date===today);if(idx>-1&&state.walks[idx].km===km){state.walks.splice(idx,1)}else if(idx>-1){state.walks[idx].km=km}else{state.walks.push({date:today,km})}saveState();renderWalking()}
+function weekStart(d){const t=new Date(d);const dow=(t.getDay()+6)%7;t.setDate(t.getDate()-dow);t.setHours(0,0,0,0);return t.getTime()}
+function sumWalks(pred){return state.walks.filter(pred).reduce((a,w)=>a+w.km,0)}
+function renderWalking(){const today=todayStr(),now=new Date(),ws=weekStart(now);const todays=state.walks.find(w=>w.date===today);[5,8,10].forEach(km=>{const b=document.getElementById("walk"+km);if(b)b.classList.toggle("active",!!(todays&&todays.km===km))});const weekKm=sumWalks(w=>weekStart(new Date(w.date))===ws);const monthKm=sumWalks(w=>{const d=new Date(w.date);return d.getFullYear()===now.getFullYear()&&d.getMonth()===now.getMonth()});const yearKm=sumWalks(w=>new Date(w.date).getFullYear()===now.getFullYear());const el=document.getElementById("walkStats");if(el)el.textContent=`Woche: ${weekKm} km · Monat: ${monthKm} km · Jahr: ${yearKm} km`}
+function greet(){const h=new Date().getHours(),t=h<11?"Guten Morgen":h<18?"Guten Tag":"Guten Abend";const el=document.getElementById("greeting");if(el)el.textContent=t+", Martin"}
+function saveMeasurement(){const w=parseFloat(String(document.getElementById("weight").value).replace(",",".")),wa=parseFloat(String(document.getElementById("waist").value).replace(",","."));if(Number.isNaN(w)&&Number.isNaN(wa)){alert("Bitte Gewicht oder Bauchumfang eintragen.");return}state.measurements.push({date:new Date().toISOString(),weight:Number.isNaN(w)?null:w,waist:Number.isNaN(wa)?null:wa,grip:document.getElementById("grip").value});saveState();document.getElementById("weight").value="";document.getElementById("waist").value="";renderMeasurements();alert("Messung gespeichert.")}
+function setDelta(id,v,s){const e=document.getElementById(id);e.textContent=v==null?"–":(v>0?"+":"")+v.toFixed(1)+s}
+function renderMeasurements(){const m=state.measurements,last=m[m.length-1],first=m[0];document.getElementById("lastWeight").textContent=last?.weight!=null?last.weight.toFixed(1)+" kg":"–";document.getElementById("lastWaist").textContent=last?.waist!=null?last.waist.toFixed(1)+" cm":"–";setDelta("weightDelta",first?.weight!=null&&last?.weight!=null?last.weight-first.weight:null," kg");setDelta("waistDelta",first?.waist!=null&&last?.waist!=null?last.waist-first.waist:null," cm");document.getElementById("history").innerHTML=m.slice().reverse().map(e=>`<tr><td>${new Date(e.date).toLocaleDateString("de-DE")}</td><td>${e.weight??"–"}</td><td>${e.waist??"–"}</td><td>${e.grip}</td></tr>`).join("")||`<tr><td colspan="4">Noch keine Messung.</td></tr>`;drawChart()}
+function drawChart(){const c=document.getElementById("chart");if(!c)return;const ctx=c.getContext("2d"),m=state.measurements;ctx.clearRect(0,0,c.width,c.height);ctx.fillStyle="#fbfcfc";ctx.fillRect(0,0,c.width,c.height);if(m.length<2){ctx.fillStyle="#68736f";ctx.font="16px sans-serif";ctx.fillText("Mindestens zwei Messungen für den Verlauf",90,115);return}const vals=m.flatMap(x=>[x.weight,x.waist]).filter(v=>v!=null),min=Math.min(...vals)-2,max=Math.max(...vals)+2,X=i=>40+i*(c.width-60)/(m.length-1),Y=v=>c.height-25-(v-min)*(c.height-45)/(max-min||1);function line(key,dash){ctx.setLineDash(dash);ctx.strokeStyle="#176b5b";ctx.lineWidth=3;ctx.beginPath();let s=false;m.forEach((e,i)=>{if(e[key]==null)return;const x=X(i),y=Y(e[key]);if(!s){ctx.moveTo(x,y);s=true}else ctx.lineTo(x,y)});ctx.stroke();ctx.setLineDash([])}line("weight",[]);line("waist",[8,6])}
+
+function latestWeight(){
+  const m=state.measurements.filter(x=>x.weight!=null);
+  return m.length?m[m.length-1].weight:84;
+}
+function calculateBMR(){
+  const w=latestWeight();
+  const h=parseFloat(document.getElementById("height")?.value||state.profile.height||180);
+  const a=parseFloat(document.getElementById("age")?.value||state.profile.age||56);
+  const s=document.getElementById("sex")?.value||state.profile.sex||"male";
+  return 10*w+6.25*h-5*a+(s==="male"?5:-161);
+}
+function saveCalories(){
+  const active=parseFloat(document.getElementById("activeCalories").value);
+  const food=parseFloat(document.getElementById("foodCalories").value);
+  state.profile={
+    sex:document.getElementById("sex").value,
+    age:parseFloat(document.getElementById("age").value)||56,
+    height:parseFloat(document.getElementById("height").value)||180
+  };
+  if(Number.isNaN(active)){alert("Bitte die Aktivitätskalorien eintragen.");return}
+  const bmr=calculateBMR();
+  const burn=Math.round(bmr+active);
+  const balance=Number.isNaN(food)?null:Math.round(food-burn);
+  state.calories.push({
+    date:new Date().toISOString(),
+    active:Math.round(active),
+    food:Number.isNaN(food)?null:Math.round(food),
+    bmr:Math.round(bmr),
+    burn,
+    balance
+  });
+  saveState();
+  document.getElementById("activeCalories").value="";
+  document.getElementById("foodCalories").value="";
+  renderCalories();
+  alert("Kaloriendaten gespeichert.");
+}
+function renderCalories(){
+  if(document.getElementById("sex")){
+    document.getElementById("sex").value=state.profile.sex||"male";
+    document.getElementById("age").value=state.profile.age||56;
+    document.getElementById("height").value=state.profile.height||180;
+  }
+  const c=state.calories[state.calories.length-1];
+  if(!c){
+    ["bmrMetric","burnMetric","balanceMetric","dailyBurnHome","dailyBalanceHome"].forEach(id=>{
+      const el=document.getElementById(id); if(el) el.textContent="–";
+    });
+    if(document.getElementById("balanceHint"))document.getElementById("balanceHint").textContent="";
+    return;
+  }
+  if(document.getElementById("bmrMetric"))document.getElementById("bmrMetric").textContent=c.bmr+" kcal";
+  if(document.getElementById("burnMetric"))document.getElementById("burnMetric").textContent=c.burn+" kcal";
+  if(document.getElementById("dailyBurnHome"))document.getElementById("dailyBurnHome").textContent=c.burn+" kcal";
+  const balanceText=c.balance==null?"–":(c.balance>0?"+":"")+c.balance+" kcal";
+  if(document.getElementById("balanceMetric"))document.getElementById("balanceMetric").textContent=balanceText;
+  if(document.getElementById("dailyBalanceHome"))document.getElementById("dailyBalanceHome").textContent=balanceText;
+  if(document.getElementById("balanceHint")){
+    document.getElementById("balanceHint").textContent=c.balance==null?"Keine Essenskalorien eingetragen.":(c.balance<0?"Kaloriendefizit":"Kalorienüberschuss");
+  }
+}
+function updateHome(){const n=state.done["w"+state.week]||0,t=plans[state.week].target;document.getElementById("weekMetric").textContent=state.week;document.getElementById("doneMetric").textContent=Object.values(state.done).reduce((a,b)=>a+b,0);document.getElementById("weekProgress").style.width=Math.min(100,n/t*100)+"%";document.getElementById("weekProgressText").textContent=`${n} von ${t} Einheiten`}
+async function enableReminder(){if(!("Notification"in window)){alert("Dieser Browser unterstützt keine Benachrichtigungen.");return}const p=await Notification.requestPermission();if(p!=="granted"){alert("Benachrichtigungen wurden nicht erlaubt.");return}localStorage.setItem("martinsReminder",document.getElementById("reminderTime").value);alert("Erinnerungszeit gespeichert. Für zuverlässige tägliche Erinnerungen müsste die App über einen Server oder den App Store bereitgestellt werden.")}
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredPrompt=e})
+async function installApp(){if(deferredPrompt){deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null}else alert("Auf dem iPhone: Safari öffnen, Teilen antippen und „Zum Home-Bildschirm“ wählen.")}
+function resetAll(){if(confirm("Wirklich alle Daten löschen?")){localStorage.clear();location.reload()}}
+function renderAll(){greet();renderWeeks();renderPlan();renderTraining();renderMeasurements();renderCalories();renderWalking();updateHome()}
+if("serviceWorker"in navigator)navigator.serviceWorker.register("service-worker.js");
+renderAll();resetTimer();
+</script>
+</body>
+</html>
+!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#176b5b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Martins Fitnessapp">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Martins Fitnessapp</title>
+<style>
+:root{--bg:#f4f7f6;--card:#fff;--text:#1d2724;--muted:#66716d;--primary:#176b5b;--soft:#e5f2ee;--border:#dbe4e1;--danger:#a43b3b;--shadow:0 10px 28px rgba(20,53,45,.09)}
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--text)}
+.app{max-width:760px;margin:auto;padding:16px 14px 100px}header{padding:10px 4px}h1{margin:0;font-size:1.55rem}h2{font-size:1.1rem;margin:0 0 10px}h3{font-size:1rem;margin:0}.sub,.small{color:var(--muted)}.small{font-size:.88rem}
+.card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:16px;margin:12px 0;box-shadow:var(--shadow)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.metric{font-size:1.45rem;font-weight:800}
+button,a.btn{border:0;border-radius:14px;padding:13px 14px;font-size:1rem;font-weight:750;text-align:center;text-decoration:none;cursor:pointer;display:inline-block}
+.primary{background:var(--primary);color:#fff}.secondary{background:var(--soft);color:var(--primary)}.ghost{background:#eef2f0;color:var(--text)}.danger{background:#f8e9e9;color:var(--danger)}.full{width:100%}.stack{display:grid;gap:9px}
+.tabs{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border-top:1px solid var(--border);z-index:20}.tabs-inner{max-width:760px;margin:auto;display:grid;grid-template-columns:repeat(5,1fr)}
+.tab{background:transparent;color:var(--muted);border-radius:0;padding:11px 2px 18px;font-size:.7rem}.tab.active{color:var(--primary);font-weight:850}
+section{display:none}section.active{display:block}.progress{height:10px;background:#e8eeec;border-radius:999px;overflow:hidden}.progress>div{height:100%;background:var(--primary);width:0}
+.notice{background:#fff7e8;border:1px solid #ecd29d;padding:12px;border-radius:14px;color:#6b4600;font-size:.88rem}
+.exercise{padding:12px 0;border-top:1px solid var(--border)}.exercise:first-child{border-top:0}.exercise-head{display:flex;justify-content:space-between;gap:10px;align-items:center}.done{opacity:.5;text-decoration:line-through}.exercise.current{background:var(--soft);border-radius:14px;margin:6px -10px;padding:12px 10px;border-top:0}
+.phase.rest{color:#b98900}
+.timer{font-size:3.2rem;font-weight:850;text-align:center;font-variant-numeric:tabular-nums;margin:14px 0}.phase,.round{text-align:center}.phase{font-weight:800;font-size:1.1rem}.round{color:var(--muted)}
+.timer-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}.checkrow{display:flex;gap:10px;align-items:center;margin:10px 0}.checkrow input{width:22px;height:22px}
+label{display:block;font-weight:750;font-size:.9rem;margin:10px 0 5px}input,select{width:100%;padding:12px;border:1px solid var(--border);border-radius:12px;font-size:1rem;background:#fff}
+input[type=checkbox]{accent-color:var(--primary)}
+table{width:100%;border-collapse:collapse;font-size:.88rem}th,td{text-align:left;padding:9px 6px;border-bottom:1px solid var(--border)}th{color:var(--muted)}
+canvas{width:100%;height:220px;background:#fbfcfc;border:1px solid var(--border);border-radius:14px}.week-row{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.week-btn{background:#eef2f0;color:var(--text);padding:10px 4px}.week-btn.active{background:var(--primary);color:#fff}
+.video{display:block;margin-top:8px;color:var(--primary);font-weight:700;text-decoration:none}.hidden{display:none}
+</style>
+</head>
+<body>
+<div class="app">
+<header><h1>Martins Fitnessapp</h1><div class="sub">Training, Fortschritt und täglicher Kalorienverbrauch</div></header>
+
+<section id="home" class="active">
+<div class="card" style="padding:14px 16px"><h2 id="greeting" style="margin:0 0 2px">Hallo, Martin</h2><div class="small" id="greetingSub">Bereit für die heutige Einheit?</div></div>
+<div class="grid2">
+<div class="card"><div class="small">Woche</div><div class="metric" id="weekMetric">1</div></div>
+<div class="card"><div class="small">Einheiten</div><div class="metric" id="doneMetric">0</div></div>
+</div>
+<div class="card"><h2>Training starten</h2><div class="stack">
+<button class="primary full" onclick="startHome()">Zuhause · 10–15 Minuten</button>
+<button class="secondary full" onclick="startTravel()">Unterwegs · 5 Minuten</button>
+</div></div>
+<div class="card"><h2>Walking</h2><div class="week-row" style="grid-template-columns:repeat(3,1fr)">
+<button class="week-btn" id="walk5" onclick="logWalk(5)">5 km</button>
+<button class="week-btn" id="walk8" onclick="logWalk(8)">8 km</button>
+<button class="week-btn" id="walk10" onclick="logWalk(10)">10 km</button>
+</div><p class="small" id="walkStats">Woche: 0 km · Monat: 0 km · Jahr: 0 km</p></div>
+<div class="card"><h2>Wochenfortschritt</h2><div class="progress"><div id="weekProgress"></div></div><p class="small" id="weekProgressText"></p></div>
+<div class="grid2">
+<div class="card"><div class="small">Gewicht</div><div class="metric" id="lastWeight">–</div></div>
+<div class="card"><div class="small">Bauchumfang</div><div class="metric" id="lastWaist">–</div></div>
+</div>
+<div class="grid2">
+<div class="card"><div class="small">Tagesverbrauch</div><div class="metric" id="dailyBurnHome">–</div></div>
+<div class="card"><div class="small">Kalorienbilanz</div><div class="metric" id="dailyBalanceHome">–</div></div>
+</div>
+<div class="notice">Bei Schmerzen, Taubheit oder unsicherem Griff bitte abbrechen. Die Kettlebell nur verwenden, wenn sie sicher gehalten werden kann.</div>
+</section>
+
+<section id="plan">
+<div class="card"><h2>8-Wochen-Plan</h2><div id="weeks" class="week-row"></div></div>
+<div class="card" id="planCard"></div>
+</section>
+
+<section id="training">
 <div class="card" id="musicCard"><h2>Musik</h2><p class="small">Vor dem Training: Spotify öffnen, Song starten, dann manuell zur App zurückkehren.</p><button class="secondary full" onclick="startMusic()">▶ Start der Musik</button></div>
 <div class="card"><div class="phase" id="phase">Bereit</div><div class="timer" id="timer">00:40</div><div class="round" id="roundInfo">Training</div>
 <div class="timer-actions"><button class="primary" id="timerBtn" onclick="toggleTimer()">Start</button><button class="ghost" onclick="resetTimer()">Zurücksetzen</button></div>
